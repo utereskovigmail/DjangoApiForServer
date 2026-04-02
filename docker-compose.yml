@@ -7,7 +7,7 @@ networks:
 services:
   postgresServerDb:
     image: postgres:18.1
-    container_name: postgres_db
+    container_name: postgres_db_poshtanet
     restart: always
     ports:
       - "3674:5432"
