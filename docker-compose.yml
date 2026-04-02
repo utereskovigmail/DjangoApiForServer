@@ -1,0 +1,50 @@
+version: "3.9"
+
+networks:
+  poshtanet:
+    driver: bridge
+
+services:
+  postgresServerDb:
+    image: postgres:18.1
+    container_name: postgres_db_poshtanet
+    restart: always
+    ports:
+      - "3674:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ${VOLUME_POSTGRES}
+    networks:
+      - poshtanet
+
+  api:
+    image: utereskovi/poshtanet-django:latest
+    container_name: poshtanet_api
+    volumes:
+      - /data/poshtanet/images:/app/images
+    environment:
+      DEBUG: "False"
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: postgresServerDb
+      DB_PORT: 5432
+    ports:
+      - "5888:8000"   # Django usually runs on 8000
+    depends_on:
+      - postgresServerDb
+    networks:
+      - poshtanet
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+
+  front:
+    image: utereskovi/poshtanet-react:latest
+    container_name: poshtanet_front
+    ports:
+      - "2488:80"
