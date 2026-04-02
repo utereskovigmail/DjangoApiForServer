@@ -33,7 +33,7 @@ services:
       DB_HOST: postgresServerDb
       DB_PORT: 5432
     ports:
-      - "5898:8000"   # Django usually runs on 8000
+      - "5888:8000"   # Django usually runs on 8000
     depends_on:
       - postgresServerDb
     networks:
